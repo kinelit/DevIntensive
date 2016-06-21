@@ -7,10 +7,9 @@
 
     <dimen name="size_small_8">8dp</dimen>
     <dimen name="size_normal_16">16dp</dimen>
-    <dimen name="size_medial_24">24dp</dimen>
-    <dimen name="size_medium_32">32dp</dimen>
     <dimen name="size_large_56">56dp</dimen>
-    <dimen name="size_larger_72">72dp</dimen>
+    <dimen name="size_xlarge_72">72dp</dimen>
+
 
 
     <!-- Spaces-->
