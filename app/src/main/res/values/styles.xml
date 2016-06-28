@@ -22,11 +22,15 @@
         <item name="android:layout_marginRight">@dimen/spacing_medium_32</item>
     </style>
 
-    <style name="linevert">
+    <style name="vertical">
         <item name="android:layout_width">@dimen/line_size</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">@color/grey_light</item>
         <item name="android:layout_marginLeft">@dimen/spacing_normal_16</item>
         <item name="android:layout_marginRight">@dimen/spacing_normal_16</item>
     </style>
+
+<style name="custom_dialog">
+    <item name="android:fullDark">@android:color/transparent</item>
+</style>
 </resources>

@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_coordinator_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".ui.activities.MainActivity"
+        >
+
+
+
+            <LinearLayout
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activities.MainActivity"
     android:orientation="vertical"
     >
 
-1
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,7 +62,7 @@
                 />
         </LinearLayout>
         <View
-            style="@style/linevert"></View>
+            style="@style/vertical"></View>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -78,7 +92,7 @@
                 />
         </LinearLayout>
         <View
-            style="@style/linevert"></View>
+            style="@style/vertical"></View>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -113,6 +127,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
     <ImageView
+        android:id="@+id/call_img"
         android:layout_width="@dimen/size_small_24"
         android:layout_height="@dimen/size_small_24"
         android:src="@drawable/ic_call_black_24dp"
@@ -387,3 +402,7 @@
     </View>
 
 </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
+    </android.support.design.widget.CoordinatorLayout>
+
