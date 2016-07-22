@@ -1,5 +1,6 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -204,11 +205,17 @@ private void setupDrawer(){
         }
     });
 }
-    /*
-  переключает режим редактирования
-    @param mode если true режим редактирования, если false режим просмотра
 
-    */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /*
+      переключает режим редактирования
+        @param mode если true режим редактирования, если false режим просмотра
+
+        */
     private void changeEditMode(int mode){
         if (mode == 1 ){
             mFab.setImageResource(R.drawable.ic_done_black_24dp);
@@ -244,6 +251,10 @@ private void setupDrawer(){
         mDataManager.getPreferencesManager().saveUserProfileData(userData);
 
     }
+    private void loadPhotoFromGallery() {
 
+    }
+    private void loadPhotoFromCamera () {
 
+    }
 }
