@@ -14,5 +14,5 @@ public interface ConstantManager {
     String USER_BIO_KEY = "USER_5_KEY";
 
 
-
+    int LOAD_PROFILE_PHOTO = 1;
 }

@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Кривцов Сергей</string>
     <string name="about">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quis bibendum ipsum, a vulputate nibh. Fusce quis ante consectetur, convallis nulla semper, varius purus. Vivamus sed aliquet arcu. Praesent ullamcorper urna dictum sem mattis, id dictum tortor hendrerit. Curabitur rutrum mi quis odio mollis, eget euismod lectus consectetur.</string>
+    <string name="user_profile.placeholder.image">Изменить фотографию профиля</string>
+    <string name="user_profile.dialog.gallery">Загрузить из галлереи</string>
+    <string name="user_profile.dialog.camera">Сделать снимок</string>
+    <string name="user_profile.dialog.cancel">Отмена</string>
+    <string name="user_profile.dialog.title">Изменить фотографию профиля</string>
 </resources>
