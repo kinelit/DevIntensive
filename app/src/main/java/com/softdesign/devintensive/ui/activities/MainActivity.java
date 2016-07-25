@@ -3,6 +3,7 @@ package com.softdesign.devintensive.ui.activities;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -256,6 +257,7 @@ private void setupDrawer(){
                 userValue.setFocusableInTouchMode(true);
                 showProfilePlaceholder();
                 lockToolbar();
+                mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             }
         } else {
             mFab.setImageResource(R.drawable.ic_create_black_24dp);
@@ -266,6 +268,7 @@ private void setupDrawer(){
                 userValue.setFocusableInTouchMode(false);
                 hideProfilePlaceholder();
                 unlockToolbar();
+                mCollapsingToolbar.setExpandedTitleColor(getResources().getColor(R.color.white));
 
                 saveUserInfoValue();
             }
@@ -325,14 +328,17 @@ private void setupDrawer(){
                         switch (choiceItem) {
                             case 0:
                                 // TODO: 22.07.16  загрузить из галлереи
+                                loadPhotoFromGallery();
                                 showSnackbar("загрузить из галлереи");
                                 break;
                             case 1:
                                 // TODO: 22.07.16  загрузить из камеры
+                                loadPhotoFromCamera();
                                 showSnackbar("загрузить из камеры");
                                 break;
-                            case 3:
-                                // TODO: 22.07.16  отмена
+                            case 2:
+                                // TODO: 22.07. 16  отмена
+                                dialog.cancel();
                                 showSnackbar("Отмена");
                                 break;
                         }
