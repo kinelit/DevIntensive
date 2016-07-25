@@ -4,7 +4,10 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -14,6 +17,7 @@ import android.support.design.widget.NavigationView.OnNavigationItemSelectedList
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,8 +34,13 @@ import android.widget.RelativeLayout;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends BaseActivity  implements View.OnClickListener{
@@ -50,12 +59,15 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
     private RelativeLayout mProfilePlaceholder;
     private CollapsingToolbarLayout mCollapsingToolbar;
     private AppBarLayout mAppBarLayout;
+    private ImageView mPofileImage;
 
 
     private EditText mUserPhone, mUserMail, mUserVk, mUserGit, mUserBio;
-
     private List<EditText> mUserInfoViews;
+
     private AppBarLayout.LayoutParams mAppBarParams = null;
+    private File mPhotoFile = null;
+    private Uri mSelectedImage = null;
 
 
 
@@ -79,6 +91,7 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
         mProfilePlaceholder=(RelativeLayout) findViewById(R.id.profile_placeholder);
         mCollapsingToolbar=(CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
+        mPofileImage = (ImageView) findViewById(R.id.user_photo_img);
 
 
         mUserPhone = (EditText) findViewById(R.id.phone_et);
@@ -118,7 +131,6 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
 //            showToast("активити создавалось");
         }
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId()==android.R.id.home){
@@ -132,43 +144,35 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
         super.onStart();
         Log.d(TAG, "onStart");
     }
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-
     }
-
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
     }
-
     @Override
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "onRestart");
         }
-
     @Override
     public void onClick(View v){
         switch (v.getId()){
             case R.id.fab:
-
                 if (mCurrentEditMode==0) {
                     changeEditMode(1);
                     mCurrentEditMode = 1;
@@ -183,9 +187,7 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
             case R.id.profile_placeholder:
                 ////  TODO: 22.07.16
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
-
                 break;
-
         }
     }
     @Override
@@ -209,8 +211,6 @@ protected void  onSaveInstanceState(Bundle outState) {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
         mAppBarParams = (AppBarLayout.LayoutParams) mCollapsingToolbar.getLayoutParams();
-
-
         if (actionBar != null){
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -230,7 +230,6 @@ private void setupDrawer(){
         }
     });
 }
-
     /**
      * Получение результата другой Activity
      * @param requestCode
@@ -240,12 +239,26 @@ private void setupDrawer(){
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case ConstantManager.REQUEST_GALLERY_PICTURE:
+                if (resultCode == RESULT_OK && data != null){
+                    mSelectedImage = data.getData();
+                    insertProfileImage(mSelectedImage);
+                }
+                break;
+            case ConstantManager.REQUEST_CAMERA_PICTURE:
+                if (resultCode == RESULT_OK && mPhotoFile != null){
+                    mSelectedImage = Uri.fromFile(mPhotoFile);
+                    insertProfileImage(mSelectedImage);
+                }
+        }
     }
+
+
 
     /*
       переключает режим редактирования
         @param mode если true режим редактирования, если false режим просмотра
-
         */
     private void changeEditMode(int mode){
         if (mode == 1 ){
@@ -280,7 +293,6 @@ private void setupDrawer(){
             mUserInfoViews.get(i).setText(userData.get(i));
             
         }
-
     }
     private void saveUserInfoValue(){
         List<String> userData = new ArrayList<>();
@@ -288,17 +300,30 @@ private void setupDrawer(){
             userData.add(userFieldView.getText().toString());
         }
         mDataManager.getPreferencesManager().saveUserProfileData(userData);
-
     }
     private void loadPhotoFromGallery() {
-
+        Intent takeGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        takeGalleryIntent.setType("image/*");
+        startActivityForResult(Intent.createChooser(takeGalleryIntent, getString(R.string.user_profile_chose_message)), ConstantManager.REQUEST_GALLERY_PICTURE);
     }
     private void loadPhotoFromCamera () {
+//
+        Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            mPhotoFile = createImageFile();
+        } catch (IOException e) {
+             e.printStackTrace();
+            // TODO: 25.07.16 обработать ошибку
+        }
+        if (mPhotoFile != null){
+            // Todo: передать фотофайл в интент
+            takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
+            startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
 
+        }
     }
     private void  hideProfilePlaceholder () {
         mProfilePlaceholder.setVisibility(View.GONE);
-
     }
     private void showProfilePlaceholder () {
         mProfilePlaceholder.setVisibility(View.VISIBLE);
@@ -312,7 +337,6 @@ private void setupDrawer(){
     private void unlockToolbar(){
         mAppBarParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL| AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
         mCollapsingToolbar.setLayoutParams(mAppBarParams);
-
     }
 
     @Override
@@ -348,9 +372,20 @@ private void setupDrawer(){
                 return builder.create();
             default:
                 return null;
-
-
         }
+    }
+private File createImageFile() throws IOException{
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = "JPEG_"+timeStamp+"_";
+    File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
+    File image = File.createTempFile(imageFileName,".jpg", storageDir);
+    return image;
 
-    }}
+}
+    private void insertProfileImage(Uri mSelectedImage) {
+        Picasso.with(this)
+                .load(mSelectedImage)
+                .into(mPofileImage);
+    }
+}

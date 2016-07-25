@@ -15,4 +15,6 @@ public interface ConstantManager {
 
 
     int LOAD_PROFILE_PHOTO = 1;
+    int REQUEST_CAMERA_PICTURE = 99;
+    int REQUEST_GALLERY_PICTURE = 88;
 }
