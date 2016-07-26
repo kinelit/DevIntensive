@@ -112,13 +112,12 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
         setupToolbar();
         setupDrawer();
         loadUserInfoValue();
-
-        List<String> test= mDataManager.getPreferencesManager().loadUserProfileData();
-
-
-
+        Picasso.with(this)
+            .load(mDataManager.getPreferencesManager().loadUserPhoto())
+            .into(mPofileImage);
 
 
+//        List<String> test= mDataManager.getPreferencesManager().loadUserProfileData();
 
         if (savedInstanceState == null)  {
 //            showSnackbar("активити запускается впервые");
@@ -383,9 +382,10 @@ private File createImageFile() throws IOException{
     return image;
 
 }
-    private void insertProfileImage(Uri mSelectedImage) {
+    private void insertProfileImage(Uri selectedImage) {
         Picasso.with(this)
-                .load(mSelectedImage)
+                .load(selectedImage)
                 .into(mPofileImage);
+        mDataManager.getPreferencesManager().SaveUserPhoto(selectedImage);
     }
 }
