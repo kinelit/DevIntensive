@@ -1,28 +1,30 @@
 package com.softdesign.devintensive.ui.activities;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.NavigationView.OnNavigationItemSelectedListener;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -59,7 +61,7 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
     private RelativeLayout mProfilePlaceholder;
     private CollapsingToolbarLayout mCollapsingToolbar;
     private AppBarLayout mAppBarLayout;
-    private ImageView mPofileImage;
+    private ImageView mProfileImage;
 
 
     private EditText mUserPhone, mUserMail, mUserVk, mUserGit, mUserBio;
@@ -91,7 +93,7 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
         mProfilePlaceholder=(RelativeLayout) findViewById(R.id.profile_placeholder);
         mCollapsingToolbar=(CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-        mPofileImage = (ImageView) findViewById(R.id.user_photo_img);
+        mProfileImage = (ImageView) findViewById(R.id.user_photo_img);
 
 
         mUserPhone = (EditText) findViewById(R.id.phone_et);
@@ -114,7 +116,8 @@ public class MainActivity extends BaseActivity  implements View.OnClickListener{
         loadUserInfoValue();
         Picasso.with(this)
             .load(mDataManager.getPreferencesManager().loadUserPhoto())
-            .into(mPofileImage);
+                .placeholder(R.drawable.userphoto) // TODO: 26.07.16  сделать плейсхолдер  и transform + crop
+            .into(mProfileImage);
 
 
 //        List<String> test= mDataManager.getPreferencesManager().loadUserProfileData();
@@ -306,7 +309,11 @@ private void setupDrawer(){
         startActivityForResult(Intent.createChooser(takeGalleryIntent, getString(R.string.user_profile_chose_message)), ConstantManager.REQUEST_GALLERY_PICTURE);
     }
     private void loadPhotoFromCamera () {
-//
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+
+
+
         Intent takeCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             mPhotoFile = createImageFile();
@@ -318,9 +325,39 @@ private void setupDrawer(){
             // Todo: передать фотофайл в интент
             takeCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mPhotoFile));
             startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
+        }
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, ConstantManager.CAMERA_REQUEST_PERMISSION_CODE);
+
+            Snackbar.make(mCoordinatorLayout, "Необходимо дать разрешения", Snackbar.LENGTH_LONG)
+                    .setAction("Разрешить", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            openApplicationSettings();
+                        }
+                    }).show();
+
+        }
+
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == ConstantManager.CAMERA_REQUEST_PERMISSION_CODE && grantResults.length == 2){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                // TODO: 26.07.16 тут обрабытаваем разрешение
+            }
+        }
+        if (grantResults[1] == PackageManager.PERMISSION_GRANTED){
 
         }
     }
+
+
     private void  hideProfilePlaceholder () {
         mProfilePlaceholder.setVisibility(View.GONE);
     }
@@ -352,12 +389,12 @@ private void setupDrawer(){
                             case 0:
                                 // TODO: 22.07.16  загрузить из галлереи
                                 loadPhotoFromGallery();
-                                showSnackbar("загрузить из галлереи");
+//                                showSnackbar("загрузить из галлереи");
                                 break;
                             case 1:
                                 // TODO: 22.07.16  загрузить из камеры
                                 loadPhotoFromCamera();
-                                showSnackbar("загрузить из камеры");
+                                //showSnackbar("загрузить из камеры");
                                 break;
                             case 2:
                                 // TODO: 22.07. 16  отмена
@@ -379,13 +416,30 @@ private File createImageFile() throws IOException{
     File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
     File image = File.createTempFile(imageFileName,".jpg", storageDir);
+    // TODO: 26.07.16  сделать плейсхолдер  и transform + crop
+
+    ContentValues values = new ContentValues();
+    values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+    values.put(MediaStore.MediaColumns.DATA, image.getCanonicalPath());
+    this.getContentResolver() .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+
     return image;
 
 }
     private void insertProfileImage(Uri selectedImage) {
         Picasso.with(this)
                 .load(selectedImage)
-                .into(mPofileImage);
+                .into(mProfileImage);
         mDataManager.getPreferencesManager().SaveUserPhoto(selectedImage);
+        // TODO: 26.07.16  сделать плейсхолдер  и transform + crop
+    }
+
+    public void openApplicationSettings(){
+        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
+
+        startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
+
     }
 }
